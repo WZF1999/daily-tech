@@ -1,0 +1,32 @@
+name: Daily Tech Explainer
+
+on:
+  schedule:
+    # 注意: GitHub 的 cron 用的是 UTC 时间!
+    # 北京时间(UTC+8)早上 7:00  ==  UTC 前一天 23:00
+    # 想改时间就改这里: 北京时间 X 点 -> UTC (X-8) 点
+    - cron: "0 23 * * *"
+  workflow_dispatch: {}   # 允许在 Actions 页面手动点 "Run workflow" 立即测试
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python daily_tech_explainer.py
